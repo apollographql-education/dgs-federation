@@ -15,6 +15,7 @@ type Listing {
     amenities: [Amenity!]!
 }
 
+"A particular feature or accommodation of a listing"
 type Amenity {
     id: ID!
     "The amenity category the amenity belongs to"

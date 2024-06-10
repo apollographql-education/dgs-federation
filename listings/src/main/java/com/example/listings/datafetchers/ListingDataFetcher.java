@@ -12,6 +12,7 @@ import com.netflix.graphql.dgs.DgsMutation;
 import com.example.listings.generated.types.CreateListingInput;
 import com.example.listings.generated.types.CreateListingResponse;
 import java.io.IOException;
+import java.util.Map;
 import java.util.Objects;
 
 @DgsComponent
@@ -29,7 +30,7 @@ public class ListingDataFetcher {
         List<ListingModel> listings = listingService.featuredListingsRequest();
         return DataFetcherResult.<List<ListingModel>>newResult()
                 .data(listings)
-                .localContext("featuredListings")
+                .localContext(Map.of("hasAmenityData", false))
                 .build();
     }
 
@@ -38,7 +39,7 @@ public class ListingDataFetcher {
         ListingModel listing = listingService.listingRequest(id);
         return DataFetcherResult.<ListingModel>newResult()
                 .data(listing)
-                .localContext("listing")
+                .localContext(Map.of("hasAmenityData", true))
                 .build();
     }
 
@@ -46,9 +47,9 @@ public class ListingDataFetcher {
     public List<Amenity> amenities(DgsDataFetchingEnvironment dfe) throws IOException {
         ListingModel listing = dfe.getSource();
         String id = listing.getId();
-        String localContext = dfe.getLocalContext();
+        Map<String, Boolean> localContext = dfe.getLocalContext();
 
-        if (Objects.equals(localContext, "listing")) {
+        if (localContext.get("hasAmenityData")) {
             return listing.getAmenities();
         }
 

@@ -9,19 +9,28 @@ type Listing {
     numOfBeds: Int
     "The cost per night"
     costPerNight: Float
-    "Indicates whether listing is closed for bookings (on hiatus)"
-    closedForBookings: Boolean
     "The amenities available for this listing"
     amenities: [Amenity!]!
 }
 
-"A particular feature or accommodation of a listing"
 type Amenity {
     id: ID!
     "The amenity category the amenity belongs to"
     category: String!
     "The amenity's name"
     name: String!
+}
+
+type Query {
+    "A curated array of listings to feature on the homepage"
+    featuredListings: [Listing!]!
+    "Returns the details about this listing"
+    listing(id: ID!): Listing
+}
+
+type Mutation {
+    "Creates a new listing"
+    createListing(input: CreateListingInput!): CreateListingResponse!
 }
 
 type CreateListingResponse {
@@ -48,16 +57,4 @@ input CreateListingInput {
     closedForBookings: Boolean
     "The Listing's amenities"
     amenities: [ID!]!
-}
-
-type Query {
-    "A curated array of listings to feature on the homepage"
-    featuredListings: [Listing!]!
-    "Returns the details about this listing"
-    listing(id: ID!): Listing
-}
-
-type Mutation {
-    "Creates a new listing"
-    createListing(input: CreateListingInput!): CreateListingResponse!
 }

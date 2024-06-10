@@ -1,20 +1,18 @@
 package com.example.listings.datafetchers;
-import com.example.listings.generated.types.Amenity;
-import com.example.listings.generated.types.CreateListingResponse;
-import com.netflix.graphql.dgs.DgsComponent;
-import com.netflix.graphql.dgs.DgsData;
-import com.netflix.graphql.dgs.DgsQuery;
-import com.example.listings.models.ListingModel;
-import com.netflix.graphql.dgs.DgsMutation;
+import com.netflix.graphql.dgs.*;
 
-import java.io.IOException;
+import com.example.listings.models.ListingModel;
 import java.util.List;
 import com.example.listings.datasources.ListingService;
+import com.example.listings.generated.types.Amenity;
+import graphql.execution.DataFetcherResult;
+import graphql.schema.DataFetcher;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.netflix.graphql.dgs.DgsDataFetchingEnvironment;
-import com.netflix.graphql.dgs.InputArgument;
+import com.netflix.graphql.dgs.DgsMutation;
 import com.example.listings.generated.types.CreateListingInput;
-
+import com.example.listings.generated.types.CreateListingResponse;
+import java.io.IOException;
+import java.util.Objects;
 
 @DgsComponent
 public class ListingDataFetcher {
@@ -25,52 +23,55 @@ public class ListingDataFetcher {
     public ListingDataFetcher(ListingService listingService) {
         this.listingService = listingService;
     }
+
     @DgsQuery
-    public List<ListingModel> featuredListings() throws IOException {
-        return listingService.featuredListingsRequest();
+    public DataFetcherResult<List<ListingModel>> featuredListings() throws IOException {
+        List<ListingModel> listings = listingService.featuredListingsRequest();
+        return DataFetcherResult.<List<ListingModel>>newResult()
+                .data(listings)
+                .localContext("featuredListings")
+                .build();
     }
 
     @DgsQuery
-    public ListingModel listing(@InputArgument String id) {
-        return listingService.listingRequest(id);
+    public DataFetcherResult<ListingModel> listing(@InputArgument String id) {
+        ListingModel listing = listingService.listingRequest(id);
+        return DataFetcherResult.<ListingModel>newResult()
+                .data(listing)
+                .localContext("listing")
+                .build();
     }
 
-    @DgsData(parentType = "Listing")
+    @DgsData(parentType="Listing")
     public List<Amenity> amenities(DgsDataFetchingEnvironment dfe) throws IOException {
         ListingModel listing = dfe.getSource();
         String id = listing.getId();
-        List<Amenity> amenities = listing.getAmenities();
+        String localContext = dfe.getLocalContext();
 
-        if (amenities != null) {
-            return amenities;
-        } else {
-            return listingService.amenitiesRequest(id);
+        if (Objects.equals(localContext, "listing")) {
+            return listing.getAmenities();
         }
+
+        return listingService.amenitiesRequest(id);
     }
 
     @DgsMutation
     public CreateListingResponse createListing(@InputArgument CreateListingInput input) {
-        ListingModel createdListing = listingService.createListingRequest(input);
         CreateListingResponse response = new CreateListingResponse();
-        // We can still access createdListing.getHash() here!
-
-        if (createdListing != null) {
+        try {
+            ListingModel createdListing = listingService.createListingRequest(input);
             response.setListing(createdListing);
-            // We can no longer access response.listing.getHash() here!
             response.setCode(200);
             response.setMessage("success");
             response.setSuccess(true);
-
-
-            return response;
+        } catch (Exception e) {
+            response.setListing(null);
+            response.setCode(500);
+            response.setMessage(e.getMessage());
+            response.setSuccess(false);
         }
 
-        response.setListing(null);
-        response.setCode(500);
-        response.setMessage("could not create listing");
-        response.setSuccess(false);
-
-        System.out.println(response.getListing());
         return response;
     }
+
 }

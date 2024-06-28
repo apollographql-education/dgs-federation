@@ -6,11 +6,11 @@ Welcome to the starter code for **GraphQL Federation with Java & DGS**. This is 
 
 The course will walk you step by step on what to do. The code in this repository picks up where the project from [Intro to GraphQL with Java & DGS](http://apollographql.com/tutorials/intro-dgs) leaves off; if you'd like, follow along with this course using your own repo! If you need a refresher on GraphQL concepts, jump back into the first course and join us here when you are ready.
 
-This project uses Java and requires JDK 17. To start the project, open a new terminal in the `soundtracks` directory and run:
+This project uses Java and requires JDK 17. To start the project, open a new terminal in the `listings` directory and run:
 
 `./gradlew bootRun`
 
-Or open `soundtracks` in your IDE, navigate to the `SoundtracksApplication.java` file and click `Run`.
+Or open `listings` in your IDE, navigate to the `ListingsApplication.java` file and click `Run`.
 
 The `final` branch of this repo contains the final stage of the course, with all of the steps and code completed! If you get stuck, you can refer to it and compare your code.
 

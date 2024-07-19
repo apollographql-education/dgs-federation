@@ -49,7 +49,7 @@ public class ListingDataFetcher {
         String id = listing.getId();
         Map<String, Boolean> localContext = dfe.getLocalContext();
 
-        if (localContext.get("hasAmenityData")) {
+        if (localContext != null && localContext.get("hasAmenityData")) {
             return listing.getAmenities();
         }
 
